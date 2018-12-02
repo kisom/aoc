@@ -1,0 +1,24 @@
+Note: I did my first pass in C++.
+
+For the first problem, I took the approach of treating this as a streaming
+problem. Given a stream, just keep a running tally of the deltas, and that's
+your frequency. My interface takes a base frequency because I wasn't sure it was
+always going to start from 0. Turns out it does, but no harm there.
+
+I approached it this way because I was concerned about performance --- though it
+was premature. In the streaming approach, I really only need to track two
+`ints`: one is the current delta being read off the stream, and one is the
+adjusted frequency. All well and good, and I also turned the examples into a
+self-check system that runs on startup.
+
+The second one threw me for a loop a bit. At that point, I wrote a duplicate
+detector, and read the entire list of deltas off the stream into a vector, using
+a standard `set<int>` to track the frequencies I've seen. This could get a
+little inefficient, and if I ran into performance problems I could do something
+like a bitfield or a bloom filter.
+
+Then I got to the end and instead of creating a new program, I just run both
+parts at the same time. This won't work with an input stream, so I had to read
+the list of deltas at the beginning of the program, refactor my running tally to
+work off a vector (I basically created _vec versions of both functions), and
+then passed that vector to both functions.

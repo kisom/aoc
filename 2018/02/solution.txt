@@ -1,0 +1,59 @@
+I'm noticing a theme here: read an input file and build a list of values, then
+run two operations on that list.
+
+For part 1, I decided to implement this as two pieces:
+
++ I started with a core type, the `Inventory`. This keeps a count of the
+  number of twos and threes that have been seen.
+
++ A `void compute_checksum(Inventory &inventory, string boxID)` function
+  that operates on a reference to an Inventory value. Really, this should return
+  a tuple, and there is a std::tuple type, but given this is single threaded and
+  for the sake of simplicity, I decided to operate on that reference. If this
+  was multi-threaded, I'd collect all the tuples and sum them later. That adds a
+  little bit of extra complexity, and I felt the tradeoffs were justified given
+  the current scenario.
++ A `void compute_checksums(vector<string> boxIDs)` that runs through the list
+  updating an Inventory and then returning the checksum from that.
+
+As with yesterday, I thought about making this a streaming solution; the theme
+(that turned out to be repeated here) from yesterday was being able to operate
+on a list of values and being able to reuse that list across parts including the
+ability to cycle multiple times through the list. The tradeoff here is increased
+memory time and extra CPU time with a pair of loops, but the input sizes are
+small enough to warrant a more naïve approach.
+
+I also repeated the pattern from yesterday of creating a self test function to
+run through all the test cases at startup. I've become fond of this because it
+makes sure that the algorithm is efficient enough to run through several times
+on simplified cases.
+
+For part 2, I started thinking about what this needed. I made the mistake of not
+reading the directions well enough, though, and it took me about 15 minutes
+longer because I assumed the maximum difference between the two characters could
+be one, not that at most one character could be different. I at first thought
+about approaching this with sets, but there's nothing that says letters can't
+repeat, so I quickly disabused myself of that notion.
+
+My implementation is similarly naïve, which I again felt was warranted given the
+limited input size. To compare two strings, I loop through both of them at the
+same time, keeping a running count of the characters that match and the number
+of differences. At the second difference, I return early to avoid doing extra
+work. Then, I basically do
+
+    for i in range(len(boxes) - 1:
+        for j in range(i+1, len(boxes)):
+	    check if the boxes match
+	    if they do, return the common string
+
+If the inputs were larger, this could get to be pretty bad:
+
++ There's O(M) time complexity and O(M) storage costs, where M is the length of
+  the strings.
+
++ There's O(N^2) time complexity for the loop in the worst case. Again, considering
+  the limited input size, the time available, and a desire for simplicity, I kept
+  this.
+
+I'm not really sure of better ways to do this, so I can't wait to see some
+alternative approaches.
