@@ -1,0 +1,15 @@
+[package]
+name = "advent2018"
+version = "0.1.0"
+authors = ["Kyle Isom <kyle@imap.cc>"]
+edition = "2018"
+
+[dependencies]
+
+[lib]
+name = "advent"
+path = "src/advent/mod.rs"
+
+[[bin]]
+name = "day01"
+path = "src/bin/day01.rs"
