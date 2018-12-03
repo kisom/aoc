@@ -1,0 +1,41 @@
+I started this one last night (PDT means I get to start working on them
+the night before) in C++ - but ran into issues with string parsing. So,
+I switched to Python and got claim parsing finished.  I didn't have a
+good idea for how to solve the problem, and was thinking along the lines
+of computing intersected area, storing overlap areas, etc... and
+struggling to figure out how to unify all these overlapping areas.
+
+As I was laying in bed, I started wondering if I could use a set to
+track points. Was that viable? Lets see, we're told the area is roughly
+1000x1000 points, so at most a million points. Best case is about 32
+bytes for a pair of points (assuming 16 bytes for a pair of 64-bit ints,
+not sure what the python representation is, a 64-bit count, and 8 bytes
+of overhead) so a grid would be 32 MiB. That's... reasonable.
+
+But I could do a sparse grid: adding a method on each claim that would
+return a list of points inside that claim. It was getting close to time
+to leave, so I just threw everything in a `collections.Counter`,
+iterating over the counter to find all the points with a count greater
+than 1, and returning the length of that list.
+
+This ends up with 323,439 points at a storage cost of roughly 10 MiB.
+
+I thought about doing this as a grid, but I wasn't sure what the max
+bounds would end up being - it turns out they did all fall inside the
+1000x1000 bounds. A grid would have ended up costing roughly 8 MiB in
+any case, which is a lot better than my worst case and on par with the
+real-world case. I could have created a grid with a size based on the
+max values seen in the claims, though.
+
+In the end, this approach worked but I think I could have done better
+given some more time on it.
+
+For part 2, I iterated over each claim and computed its set of points.
+I kept a count of the value of each in point in the counter from the
+previous section, and if the count at the end was equal to the area, I
+returned that claim. This was relatively quick to count. All in all,
+my code ran in a third of a second, which is acceptable but it could be
+better.
+
+I'm not sure whether I'm going to go back and do this in C++ and Rust,
+mostly due to time constraints.
