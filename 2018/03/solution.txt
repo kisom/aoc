@@ -39,3 +39,26 @@ better.
 
 I'm not sure whether I'm going to go back and do this in C++ and Rust,
 mostly due to time constraints.
+
+Update:
+After another post on the mailing list, I feel like it's worth noting
+that I opted to do string parsing with a regex; in this case, a claim
+could be represented by the regex
+
+```regex
+'^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$'
+```
+
+This is in contrast to the (broken) C++ version, which used substrings
+and string streams. I have some good ideas about how to fix the C++
+version, but I've got some other life things to attend to instead. For
+future reference (I suspect I'll come back to this), for this version
+I'd like to
+
+* Investigate regex options for C++
+* Investigate parser combinators for C++
+* Implement the same algorithm I used in Python
+
+The algorithm, once I have actual `Claim`s, *should* be straightforward
+to implement with `std::Set`, which keeps a count. Once I have that
+algorithm working, I'd like to get it working with the grid idea.
