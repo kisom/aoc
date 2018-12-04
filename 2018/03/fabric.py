@@ -3,15 +3,17 @@
 import collections
 import re
 import sys
+from typing import List
+
 
 class Claim:
-    __slots__ = ['id', 'upper_left', 'lower_right']
+    __slots__ = ["id", "upper_left", "lower_right"]
 
-    def __init__(self, id, x0, y0, x1, y1):
+    def __init__(self, id: int, x0: int, y0: int, x1: int, y1: int):
         self.id = int(id)
         self.upper_left = (x0, y0)
         self.lower_right = (x1, y1)
-    
+
     def __eq__(self, other):
         if self.id != other.id:
             return False
@@ -28,12 +30,15 @@ class Claim:
                 points.append((i, j))
         return points
 
+
 def create_claim_regex():
-    return re.compile(r'^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$')
+    return re.compile(r"^#(\d+) @ (\d+),(\d+): (\d+)x(\d+)$")
+
 
 claim_regex = create_claim_regex()
 
-def process_claim(claim):
+
+def process_claim(claim: str) -> Claim:
     m = claim_regex.match(claim.strip())
     x0 = int(m.group(2))
     y0 = int(m.group(3))
@@ -41,16 +46,18 @@ def process_claim(claim):
     y1 = y0 + int(m.group(5))
     return Claim(m.group(1), x0, y0, x1, y1)
 
+
 def self_check_process_claim():
-    claim_strings = ['#7 @ 922,250: 13x26', '#8 @ 256,742: 18x14']
+    claim_strings = ["#7 @ 922,250: 13x26", "#8 @ 256,742: 18x14"]
     expected = [Claim(7, 922, 250, 935, 276), Claim(8, 256, 742, 274, 756)]
 
     for i in range(len(claim_strings)):
         claim = process_claim(claim_strings[i])
-        assert(claim == expected[i])
+        assert claim == expected[i]
 
-def load_claims(path):
-    with open(path, 'rt') as claim_file:
+
+def load_claims(path: str) -> List[Claim]:
+    with open(path, "rt") as claim_file:
         return list(map(process_claim, claim_file.readlines()))
 
 
@@ -60,11 +67,13 @@ def map_points(claims):
         points = claim.points()
         for point in points:
             counter[point] += 1
-    
-    return  counter
+
+    return counter
+
 
 def overlapping(points):
     return len([pt for pt in points.keys() if points[pt] > 1])
+
 
 def alone(claims, counter):
     for claim in claims:
@@ -77,28 +86,34 @@ def alone(claims, counter):
             return claim.id
     return None
 
+
 def self_check_overlapping():
-    claims = list(map(process_claim, ['#1 @ 1,3: 4x4', '#2 @ 3,1: 4x4', '#3 @ 5,5: 2x2']))
+    claims = list(
+        map(process_claim, ["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"])
+    )
     area = overlapping(map_points(claims))
-    assert(area == 4)
+    assert area == 4
+
 
 def self_check():
     self_check_process_claim()
     # self_check_points()
     self_check_overlapping
-    print('self check OK')
+    print("self check OK")
+
 
 def main(args):
     for arg in args:
         claims = load_claims(arg)
-        print('Loaded {} claims'.format(len(claims)))
+        print("Loaded {} claims".format(len(claims)))
         counter = map_points(claims)
         area = overlapping(counter)
-        print('Overlapping area:', area)
+        print("Overlapping area:", area)
 
         lone = alone(claims, counter)
-        print('Lone claim:', lone)
+        print("Lone claim:", lone)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     self_check()
     main(sys.argv[1:])

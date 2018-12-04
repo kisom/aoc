@@ -3,10 +3,9 @@ CXXFLAGS :=	-Werror -Wall -std=c++14
 TARGET := fabric
 all: $(TARGET)
 	./$(TARGET) $(TARGET).txt
-	./$(TARGET)-hs
 
 $(TARGET): $(TARGET).cc
-	clang++ $(CXXFLAGS) -o $@ $<
+	clang++ $(CXXFLAGS) -o $@ $< -lre2
 
 $(TARGET)-hs: $(TARGET).hs
 	ghc -o $@ $<
