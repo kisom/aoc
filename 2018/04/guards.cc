@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -6,170 +7,212 @@
 
 using namespace std;
 
-class Guard {
+static re2::RE2	wakesup("^\\[(\\d+)-(\\d+)-(\\d+) (\\d+):(\\d+)] wakes up$");
+static re2::RE2	fallasleep("^\\[(\\d+)-(\\d+)-(\\d+) (\\d+):(\\d+)] falls asleep$");
+static re2::RE2	onshift("^\\[(\\d+)-(\\d+)-(\\d+) (\\d+):(\\d+)] Guard #(\\d+) begins shift");
+
+class Date {
 public:
-	int	id;
-	int	sleeps;
-	Guard() : id(0), sleeps(0) {};
-} Guard;
+	int	year;
+	int	month;
+	int	day;
+	int	hour;
+	int	minute;
 
-const int EVENT_ONSHIFT = 1;
-const int EVENT_SLEEP   = 2;
-const int EVENT_AWAKE   = 3;
+	bool is_zero() { return year == 0 && month == 0 && day == 0 && hour == 0 && minute == 0; }
 
-class Event {
-public:
-	int		id;
-	uint32_t	timestamp;
-	int		event;
-	int		sleep;
-
-	Event() : id(0), timestamp(0), event(0), sleep(0) {};
-
-	friend bool operator<(const Event& l, const Event& r) {
-		return l.timestamp < r.timestamp;
+	Date() : year(0), month(0), day(0), hour(0), minute(0) {};
+	Date(int year, int month, int day, int hour, int minute) : year(year), month(month), day(day), hour(hour), minute(minute) {};
+	friend ostream& operator<<(ostream &outs, const Date& d) {
+		outs << d.year << "-" << d.month << "-" << d.day << " " << d.hour << ":" << d.minute;
+		return outs;
+	}
+	friend bool operator<(const Date& lhs, const Date &rhs) {
+		if (lhs.year < rhs.year) return true;
+		if (lhs.month < rhs.month) return true;
+		if (lhs.day < rhs.day) return true;
+		if (lhs.hour < rhs.hour) return true;
+		if (lhs.minute < rhs.minute) return true;
+		return false;
+	}
+	friend bool operator==(const Date& lhs, const Date &rhs) {
+		if (lhs.year != rhs.year) return false;
+		if (lhs.month != rhs.month) return false;
+		if (lhs.day != rhs.day) return false;
+		if (lhs.hour != rhs.hour) return false;
+		if (lhs.minute != rhs.minute) return false;
+		return true;
+	}
+	friend bool operator!=(const Date& lhs, const Date& rhs) {
+		return (!(lhs == rhs));
 	}
 };
 
-
-
-static uint32_t
-get_timestamp(int year, int month, int day, int hour, int minute)
+static void
+self_check_dates()
 {
-	uint32_t	timestamp;
-
-	timestamp = year * 31536000;
-	switch (month) {
-		case 1:
-		case 3:
-		case 5:
-		case 7:
-		case 8:
-		case 10:
-		case 12:
-			timestamp += 31 * 86400;
-			break;
-		case 2:
-			timestamp += 28 * 86400;
-			break;
-		default:
-			timestamp += 30 * 86400;
-	}
-
-	timestamp += day * 86400;
-	timestamp += hour * 3600;
-	timestamp += minute * 60;
-	return timestamp;
+	// 1518-11-1 0:0 10 3
+	// 1518-11-4 0:2 99 3
+	// 1518-11-5 0:3 99 3
+	Date a = Date(1518,11,1,0,0);
+	Date b = Date(1518,11,4,0,2);
+	Date c = Date(1518,11,5,0,3);
+	Date d = Date(1518, 11, 1, 0, 5);
+	assert(d < c);
+	assert(a < b);
+	assert(a < c);
+	assert(b < c);
+	assert(d < b);
+	assert(a < d);
 }
 
-static re2::RE2	wakesup("^[(\\d+)\\-(\\d+)\\-(\\d+) (\\d+):(\\d+)] wakes up$");
-static re2::RE2	fallasleep("^[(\\d+)\\-(\\d+)\\-(\\d+) (\\d+):(\\d+)] falls asleep$");
-static re2::RE2	onshift("[(\\d+)\\-(\\d+)\\-(\\d+) (\\d+):(\\d+)] Guard #(\\d+) begins shift");
+class Event {
+public:
+	int	id;
+	Date	d;
+	int	what;
+	Event() : id(0), d(), what(0) {};
+	friend bool operator<(const Event& l, const Event& r) {
+		return l.d < r.d;
+	}
+	friend bool operator==(const Event& a, const Event& b) {
+		return a.id == b.id && a.d == b.d && a.what == b.what;
+	}
+	friend bool operator!=(const Event& a, const Event& b) {
+		return !(a == b);
+	}
+};
+
+static int ev_start = 3;
+static int ev_sleep = 1;
+static int ev_wake  = 2;
+
+static void
+dumpev(Event &e)
+{
+	cerr << e.d.year << "-" << e.d.month << "-" << e.d.day << " " << e.d.hour << ":" << e.d.minute << " " << e.what << " " << e.id << endl;
+}
+
 
 static Event
-parse_event(string record)
+parse(string record)
 {
-	int year, month, day, hour, minute;
-	int id;
-	Event event;
+	Event	e;
 
-	if (re2::RE2::FullMatch(record, onshift, &year, &month, &day, &hour, &minute, &id)) {
-		auto timestamp = get_timestamp(year, month, day, hour, minute);
-		event.id = id;
-		event.timestamp = timestamp;
-		event.event = EVENT_ONSHIFT;
-	}
-	else if (re2::RE2::FullMatch(record, wakesup, &year, &month, &day, &hour, &minute)) {
-		auto timestamp = get_timestamp(year, month, day, hour, minute);
-		event.timestamp = timestamp;
-		event.event = EVENT_AWAKE;
+	int year, month, day, hour, minute, id;
+	id = 0;
+
+	if (re2::RE2::FullMatch(record, wakesup, &year, &month, &day, &hour, &minute)) {
+		e.what = ev_wake;
 	}
 	else if (re2::RE2::FullMatch(record, fallasleep, &year, &month, &day, &hour, &minute)) {
-		auto timestamp = get_timestamp(year, month, day, hour, minute);
-		event.timestamp = timestamp;
-		event.event = EVENT_SLEEP;
+		e.what = ev_sleep;
+	}
+	else if (re2::RE2::FullMatch(record, onshift, &year, &month, &day, &hour, &minute, &id)) { 
+		e.what = ev_start;
+	}
+	else {
+		abort();
 	}
 
-	return event;
-}
-
-static vector<Event>
-read_events(string path)
-{
-	vector<Event>	events;
-	ifstream	eventLog(path);
-
-	for (string record; getline(eventLog, record); ) {
-		auto event = parse_event(record);
-		events.push_back(event);
-	}
-	
-	sort(events.begin(), events.end());
-	int id = 0;
-	uint32_t last_time = 0;
-
-	for (auto i = 0; i < events.size(); i++) {
-		auto event = events.at(i);
-		if (event.event == EVENT_ONSHIFT) {
-			id = event.id;
-			continue;
-		}
-
-		event.id = id;
-		if (event.event == EVENT_SLEEP) {
-			last_time = event.timestamp;
-		} else {
-			event.sleep = event.timestamp - last_time;
-		}
-
-		events.at(i) = event;
-		cout << event.id << " " << event.event << " @ " << event.timestamp << endl;
-	}
-
-	return events;
+	Date d(year, month, day, hour, minute);
+	e.id = id;
+	e.d = d;
+	assert(e.d.year == 1518);
+	assert(e.what != 0);
+	return e;
 }
 
 static int
-find_sleep_guard(vector<Event> events)
+read_events(string path)
 {
-	map<int, int>	sleepers;
+	vector<Event>	records;
+	ifstream	eventLog(path);
+	map<int, int*>	sleepers;
+	map<int, int>   max_sleepers;
 
-	int id = 0;
+	for (string record; getline(eventLog, record); ) {
+		if (record == "") continue;
+		auto event = parse(record);
+		records.push_back(event);
+	}
+
+	for (auto event : records) {
+		if (event.d.is_zero()) {
+			cout << "found a zero date\n";
+			abort();
+		}
+	}
+	
+	dumpev(records[0]);
+	cout << records.size() << endl;
+	sort(records.begin(), records.end(), [](Event a, Event b) { return a < b; });
+	cout << "sorting complete\n";
+
+	int last_id = 0;
+	int last_minute = 0;
+
+	int max_id = 0;
 	int max_sleep = 0;
 
-	for (auto event : events) {
-		if (event.event != EVENT_AWAKE) {
+	for (auto i = 0; i < records.size(); i++) {
+		auto record = records[i];
+		cout << record.d << " " << record.id << " " << record.what << endl;
+		if (record.what == ev_start) {
+			last_id = record.id;
 			continue;
 		}
-
-		auto it = sleepers.find(event.id);
-		auto sleep = event.sleep;
-
-		if (it == sleepers.end()) {
-			sleepers[event.id] = sleep;
+		if (record.what == ev_sleep) {
+			last_minute = record.d.minute;
+			continue;
 		}
-		else {
-			sleep += it->second;
-			sleepers[event.id] = sleep;
+		if (record.what == ev_wake) {
+			auto it = sleepers.find(last_id);
+
+			if (it == sleepers.end()) {
+				sleepers[last_id] = new int[60];
+				for (int i = 0; i < 60; i++) {
+					sleepers[last_id][i] = 0;
+				}
+				max_sleepers[last_id] = 0;
+			}
+
+			cout << last_id << " " << last_minute << " " << record.d.minute << endl;
+			for (int i = last_minute; i < record.d.minute; i++) {
+				sleepers[last_id][i] = sleepers[last_id][i] + 1;
+			}
+
+			max_sleepers[last_id] += (record.d.minute - last_minute);
+			if (max_sleepers[last_id] > max_sleep) {
+				max_id = last_id;
+				max_sleep = max_sleepers[last_id];
+				cout << "max sleeper: " << max_id << " " << max_sleep << endl;
+			}
 		}
 
-		if (sleep > max_sleep) {
-			id = event.id;
-			max_sleep = sleep;
+	}
+
+	last_minute = 0;
+	max_sleep = 0;
+	auto schedule = sleepers[max_id];
+	for (auto i = 0; i < 60; i++) {
+		if (schedule[i] > max_sleep) {
+			max_sleep = schedule[i];
+			last_minute = i;
+			cout << "new best: " << max_id << " " << max_sleep << " " << last_minute << endl;
 		}
 	}
 
-	return id * (max_sleep / 60);
+	cout << ">" << max_id << " " << last_minute << endl;
+	return max_id * last_minute;
 }
 
 int
 main(int argc, char *argv[])
 {
+	self_check_dates();
 	for (auto i = 1; i < argc; i++) {
-		auto events = read_events(string(argv[i]));
-		cout << events.size() << " events loaded.\n";
-		
-		auto answer = find_sleep_guard(events);
+		auto answer = read_events(string(argv[i]));
 		cout << answer << endl;
 	}
 }

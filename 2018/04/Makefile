@@ -1,8 +1,10 @@
-CXXFLAGS :=	-Werror -Wall -std=c++14 -lre2
+CXXFLAGS :=	-Werror -Wall -std=c++14 -lre2 -g -O0 -fsanitize=address
 
 TARGET := guards
 all: $(TARGET)
-	./$(TARGET) $(TARGET).txt
+	-rm -f core
+	./$(TARGET) example.txt
+	# ./$(TARGET) $(TARGET).txt
 
 $(TARGET): $(TARGET).cc
 	clang++ $(CXXFLAGS) -o $@ $<
