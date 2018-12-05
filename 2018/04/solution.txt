@@ -1,0 +1,7 @@
+I did this naively: parsing all the lines into an Event, with a date, guard ID,
+and event type. Then I built a map of guard -> total sleep and guard->counter of
+each minute. For part 1, I found the guard who slept the most, then found the
+minute they slept the most to get the answer. For part 2, I just looked through
+the counter map to find the highest minute, recording which guard it was. I spent
+a while trying to do this in C++, then eventually did it in Python in about a half
+hour.
