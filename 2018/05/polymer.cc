@@ -45,6 +45,16 @@ react(istream &in)
 	return result.size();
 }
 
+static void
+self_check_react()
+{
+	string		chain = "dabAcCaCBAcCcaDA";
+	string		expected = "dabCBAcaDA";
+	stringstream	chainStream(chain);
+	
+	assert(react(chainStream) == static_cast<int>(expected.size()));
+}
+
 static string
 stripBase(const string s, char base)
 {
@@ -112,6 +122,14 @@ readFile(string path)
 	return chain;
 }
 
+static void
+self_check()
+{
+	self_check_react();
+	self_check_reactAll();
+	cout << "self check OK" << endl;
+}
+
 static int
 part1(string chain)
 {
@@ -123,7 +141,7 @@ part1(string chain)
 int
 main(int argc, char *argv[])
 {
-	self_check_reactAll();
+	self_check();
 
 	for (auto i = 1; i < argc; i++) {
 		auto chain = readFile(string(argv[i]));
