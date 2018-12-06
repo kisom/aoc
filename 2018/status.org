@@ -13,16 +13,16 @@
 
    | Day | Path | Language | Status | Notes |
    +-----|------|----------|--------|-------|
-   | 01 | 01/calibration.cc | C++     | Complete   |                                         |
-   | 01 | 01/calibration.hs | Haskell | Complete   |                                         |
-   | 02 | 02/inventory.cc   | C++     | Complete   |                                         |
-   | 02 | 02/inventory.hs   | Haskell | Complete   |                                         |
-   | 03 | 03/fabric.cc      | C++     | Broken     |                                         |
-   | 03 | 03/fabric.py      | Python3 | Complete   | Switched to Python for the sake of time |
-   | 04 | 04/guards.cc      | C++     | Broken     |                                         |
-   | 04 | 04/guards.py      | Python3 | Complete   |                                         |
-   | 05 | 05/polymer.cc     | C++     | Incomplete |                                         |
-   | 05 | 05/polymer.py     | Python3 | Complete   |                                         |
+   | 01 | 01/calibration.cc | C++     | Complete |                                         |
+   | 01 | 01/calibration.hs | Haskell | Complete |                                         |
+   | 02 | 02/inventory.cc   | C++     | Complete |                                         |
+   | 02 | 02/inventory.hs   | Haskell | Complete |                                         |
+   | 03 | 03/fabric.cc      | C++     | Broken   |                                         |
+   | 03 | 03/fabric.py      | Python3 | Complete | Switched to Python for the sake of time |
+   | 04 | 04/guards.cc      | C++     | Broken   |                                         |
+   | 04 | 04/guards.py      | Python3 | Complete |                                         |
+   | 05 | 05/polymer.cc     | C++     | Complete |                                         |
+   | 05 | 05/polymer.py     | Python3 | Complete |                                         |
 
 ** Wishlist
 
@@ -30,6 +30,6 @@
 
    + Finish day 3 C++
    + Finish day 4 C++
-   + Finish day 5 C++
+
 
 
