@@ -1,0 +1,10 @@
+I approached this like a parsing problem. My base react function takes a stream
+of characters, and collapses them as reactions are found. Basically, I keep a
+stack of characters as I read them, then compare the latest character to the top
+of the stack. If they're a match, I pop off the stack and keep going. Otherwise,
+I push the new character onto the stack.
+
+For the second part, I created a set of all the characters in the uppercased
+string. For each character in this set, I remove all occurrences of it (both
+upper and lowercase), then react. I kept a map of removed base -> size of the
+result, and return the minimum of this map.
