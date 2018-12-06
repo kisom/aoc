@@ -2,7 +2,8 @@ CXXFLAGS :=	-Werror -Wall -std=c++14 -lre2 -g -O0 -fsanitize=address
 
 TARGET := polymer
 all: $(TARGET)
-	./$(TARGET) $(TARGET).txt
+	time ./$(TARGET) $(TARGET).txt
+	time ./$(TARGET).py $(TARGET).txt
 
 $(TARGET): $(TARGET).cc
 	clang++ $(CXXFLAGS) -o $@ $<

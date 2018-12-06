@@ -2,13 +2,13 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include <iterator>
 #include <set>
 #include <sstream>
 #include <string>
 #include <stack>
 
 using namespace std;
+
 
 static int
 react(istream &in)
@@ -45,6 +45,7 @@ react(istream &in)
 	return result.size();
 }
 
+
 static void
 self_check_react()
 {
@@ -54,6 +55,7 @@ self_check_react()
 	
 	assert(react(chainStream) == static_cast<int>(expected.size()));
 }
+
 
 static string
 stripBase(const string s, char base)
@@ -67,6 +69,7 @@ stripBase(const string s, char base)
 	sCopy.erase(remove(sCopy.begin(), sCopy.end(), lcase), sCopy.end());
 	return sCopy;
 }
+
 
 static int
 reactAll(string chain)
@@ -96,6 +99,7 @@ reactAll(string chain)
 	return minChain;
 }
 
+
 static void
 self_check_reactAll()
 {
@@ -104,6 +108,7 @@ self_check_reactAll()
 	auto result = reactAll(chain);
 	assert(result == 4);
 }
+
 
 static string
 readFile(string path)
@@ -122,6 +127,7 @@ readFile(string path)
 	return chain;
 }
 
+
 static void
 self_check()
 {
@@ -130,6 +136,7 @@ self_check()
 	cout << "self check OK" << endl;
 }
 
+
 static int
 part1(string chain)
 {
@@ -137,6 +144,7 @@ part1(string chain)
 
 	return react(chainFile);
 }
+
 
 int
 main(int argc, char *argv[])

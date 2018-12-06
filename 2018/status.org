@@ -11,18 +11,18 @@
    Around day 3, I ended up doing a first pass in Python for the sake
    of time.
 
-   | Day | Path | Language | Status | Notes |
-   +-----|------|----------|--------|-------|
-   | 01 | 01/calibration.cc | C++     | Complete |                                         |
-   | 01 | 01/calibration.hs | Haskell | Complete |                                         |
-   | 02 | 02/inventory.cc   | C++     | Complete |                                         |
-   | 02 | 02/inventory.hs   | Haskell | Complete |                                         |
-   | 03 | 03/fabric.cc      | C++     | Broken   |                                         |
-   | 03 | 03/fabric.py      | Python3 | Complete | Switched to Python for the sake of time |
-   | 04 | 04/guards.cc      | C++     | Broken   |                                         |
-   | 04 | 04/guards.py      | Python3 | Complete |                                         |
-   | 05 | 05/polymer.cc     | C++     | Complete |                                         |
-   | 05 | 05/polymer.py     | Python3 | Complete |                                         |
+   | Day | Path              | Language | Status   | Notes                                   |
+   |-----+-------------------+----------+----------+-----------------------------------------|
+   |  01 | 01/calibration.cc | C++      | Complete |                                         |
+   |  01 | 01/calibration.hs | Haskell  | Complete |                                         |
+   |  02 | 02/inventory.cc   | C++      | Complete |                                         |
+   |  02 | 02/inventory.hs   | Haskell  | Complete |                                         |
+   |  03 | 03/fabric.cc      | C++      | Broken   |                                         |
+   |  03 | 03/fabric.py      | Python3  | Complete | Switched to Python for the sake of time |
+   |  04 | 04/guards.cc      | C++      | Broken   |                                         |
+   |  04 | 04/guards.py      | Python3  | Complete |                                         |
+   |  05 | 05/polymer.cc     | C++      | Complete |                                         |
+   |  05 | 05/polymer.py     | Python3  | Complete |                                         |
 
 ** Wishlist
 
