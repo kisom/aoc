@@ -5,6 +5,7 @@
 #include <iterator>
 #include <set>
 #include <sstream>
+#include <string>
 #include <stack>
 
 using namespace std;
@@ -41,13 +42,20 @@ react(istream &in)
 		in >> current;
 	}
 
-	auto n = result.size();
-	while (!result.empty()) {
-		auto c = result.top(); result.pop();
-		cout << c;
-	}
-	cout << endl;
-	return n;
+	return result.size();
+}
+
+static string
+stripBase(const string s, char base)
+{
+	string sCopy;
+	auto lcase = static_cast<char>(base ^ 0x20);
+
+	sCopy.reserve(s.size());
+	copy(s.begin(), s.end(), back_inserter(sCopy));
+	sCopy.erase(remove(sCopy.begin(), sCopy.end(), base), sCopy.end());
+	sCopy.erase(remove(sCopy.begin(), sCopy.end(), lcase), sCopy.end());
+	return sCopy;
 }
 
 static int
@@ -65,15 +73,7 @@ reactAll(string chain)
 	}
 
 	for (auto base : bases) {
-		string	chainCopy;
-		chainCopy.reserve(chain.size());
-
-		copy(chain.begin(), chain.end(), back_inserter(chainCopy));
-		auto lcase = static_cast<char>(base ^ 0x20);
-		cout << chain << " - " << base << ", " << lcase;
-		remove(chainCopy.begin(), chainCopy.end(), base);
-		remove(chainCopy.begin(), chainCopy.end(), lcase);
-		cout << "->" << chainCopy << endl;
+		string	chainCopy = stripBase(chain, base);
 
 		stringstream chainStream(chainCopy);
 		auto result = react(chainStream);
@@ -83,7 +83,6 @@ reactAll(string chain)
 		}
 	}
 
-	cout << minBase << "->" << minChain << endl;
 	return minChain;
 }
 
