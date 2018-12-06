@@ -32,6 +32,7 @@ def reactall(s):
         s2 = s.replace(base, '')
         s2 = s2.replace(base.lower(), '')
         result = react(io.StringIO(s2))
+        print(base, result)
         results[base] = len(result)
     return min(results.items(), key=operator.itemgetter(1))
 
