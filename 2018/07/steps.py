@@ -3,6 +3,7 @@
 import copy
 import re
 import sys
+from time import sleep
 
 # { 'a': set('b', 'c') }
 
@@ -23,6 +24,9 @@ def parse_steps(lines):
 
     return steps
 
+def parse_file(path):
+    with open(path, 'rt') as file:
+        return parse_steps(file)
 
 TEST_STEPS = {
     "A": set(["C"]),
@@ -54,16 +58,18 @@ def mark_done(steps, name):
             steps[step].remove(name)
     return steps
 
+def next_task(steps):
+    for step in sorted(steps.keys()):
+        if len(steps[step]) == 0:
+            return step
 
 def sequence(steps):
     result = ""
     while len(steps) > 0:
-        for step in sorted(steps.keys()):
-            if len(steps[step]) == 0:
-                result += step
-                del(steps[step])
-                steps = mark_done(steps, step)
-                break
+        step = next_task(steps)
+        result += step
+        del(steps[step])
+        steps = mark_done(steps, step)
     return result
 
 
@@ -72,20 +78,81 @@ def self_check_sequence():
     result = sequence(steps)
     assert result == "CABDFE"
 
+def time_for(name, offset=60):
+    return offset + ord(name) - 0x40
+
+def self_check_time_for():
+    assert(61 == time_for('A'))
+    assert(86 == time_for('Z'))
+
+def find_available(waiting, time):
+    return [worker for worker in  waiting if waiting[worker] <= time]
+
+def next_task_sequenced(steps, assignments):
+    in_progress = list(assignments.values())
+    for step in sorted(steps.keys()):
+        if len(steps[step]) == 0 and not step in in_progress:
+            return step
+
+def self_check_next_task_sequenced():
+    steps = copy.deepcopy(TEST_STEPS)
+    assignments = {0: 'C'}
+    assert(next_task_sequenced(steps, assignments) == None)
+
+def sequence_timed(steps, workers, offset):
+    time = 0
+    waiting = dict.fromkeys(range(workers), 0)
+    assignment = {}
+    result = ''
+
+    while len(steps) > 0:
+        available = find_available(waiting, time)
+        for worker in available:
+            if worker in assignment:
+                step = assignment[worker]
+                result += step
+                steps = mark_done(steps, step)
+                del(assignment[worker])
+                del(steps[step])                
+            step = next_task_sequenced(steps, assignment)
+            if step:
+                waiting[worker] = time + time_for(step, offset)
+                assignment[worker] = step
+        if len(steps) == 0:
+            break
+        time += 1
+        s = '{:04}|\t'.format(time)
+        for worker in range(workers):
+            if worker in assignment:
+                s += assignment[worker]
+            else:
+                s += '.'
+        s += '\t| ' + result
+    return time, result
+
+
+def self_check_sequence_timed():
+    steps = copy.deepcopy(TEST_STEPS)
+    time, result = sequence_timed(steps, 2, 0)
+    assert(result == "CABFDE")
+    assert(time == 15)
 
 def self_check():
     self_check_parse_steps()
     self_check_sequence()
+    self_check_time_for()
+    self_check_next_task_sequenced()    
+    self_check_sequence_timed()
 
     print('self check OK')
-
-def sequence_file(path):
-    with open(path, 'rt') as file:
-        return sequence(parse_steps(file))
     
 def main(args):
     for path in args:
-        print(sequence_file(path))
+        steps = parse_file(path)
+        print(sequence(copy.deepcopy(steps)))
+        time, result = sequence_timed(steps, 5, 60)
+        print('{} in {}'.format(result, time))
+                            
 
 if __name__ == "__main__":
     self_check()
