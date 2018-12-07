@@ -128,6 +128,7 @@ def sequence_timed(steps, workers, offset):
             else:
                 s += '.'
         s += '\t| ' + result
+        print(s)
     return time, result
 
 
