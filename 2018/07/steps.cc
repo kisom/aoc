@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <cassert>
+#include <chrono>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -9,116 +12,187 @@
 using namespace std;
 
 
-static re2::RE2	stepRegex("Step (.) must be finished before step (.) can begin.");
+// static re2::RE2	stepRegex("Step (.) must be finished before step (.) can begin.");
 
-class Step {
+
+class Problem {
 public:
-	Step(char name) : name(name) {}
+	Problem() {};
+	Problem(vector<string> lines)
+	{
+		for (auto line : lines) {
+			char	name = line[36];
+			char	dependency = line[5];
+			// auto	matched = re2::RE2::FullMatch(line, stepRegex, &dependency, &name);
 
-	void	dependsOn(char x) {
-		prerequisites.insert(x);
-	}
-
-	void	completed(char x) {
-		prerequisites.erase(x);
-	}
-
-	bool	ready() {
-		return prerequisites.empty();
-	}
-
-	bool	requires(char x) {
-		return prerequisites.count(x) > 0;
-	}
-
-	friend bool operator<(const Step &l, const Step &r) {
-		return l.name < r.name;
-	}
-
-	friend ostream& operator<<(ostream& outs, const Step &step) {
-		outs << "Step " << step.name << " requires:";
-		for (auto x : step.prerequisites) {
-			outs << " " << x;
+			// assert(matched);
+			this->constraint(name, dependency);
 		}
-		return outs;
-	}
-private:
-	char		name;
-	set<char>	prerequisites;
-};
 
-class Sum {
-	Sum() {};
-	void	add(char name, char requisite) {
-		if (steps.count(name) == 0) {
-			auto step = new Step(name);
-			step->dependsOn(requisite);
-			steps[name] = step;
-		} else {
-			auto step = steps[name];
-			step->dependsOn(requisite);
-			steps[name] = step;
+		// Populate vector.
+		for (auto it = constraints.begin();
+		     it != constraints.end(); it++) {
+			pieces.push_back(it->first);
 		}
+
+		sort(pieces.begin(), pieces.end());
 	}
-	void	complete(char name) {
-		vector<char>	removals;
-		for (auto it = steps.begin(); it != steps.end(); it++) {
-			auto step = steps[*it];
-			if (!step->requires(name)) {
+
+	void
+	constraint(char name, char dependency)
+	{
+		// Make sure both the name and constraint are accounted
+		// for. Without this, the starting step won't be recorded.
+		if (constraints.count(name) == 0) {
+			constraints[name] = set<char>();
+		};
+
+		if (constraints.count(dependency) == 0) {
+			constraints[dependency] = set<char>();
+		}
+
+		auto temp = constraints[name];
+		temp.insert(dependency);
+		constraints[name] = temp;
+	}
+
+	void
+	complete(char dependency)
+	{
+		for (auto step : constraints) {
+			if (step.second.count(dependency) == 0) {
 				continue;
 			}
-
-			step->completed(name);
-			if (step->ready()) {
-				removals.push_back(*it);
-			}
+			constraints[step.first].erase(dependency);
 		}
 	}
+
+	string
+	solve()
+	{
+		string	result;
+		while (constraints.size() > 0) {
+			for (auto it = pieces.begin(); it != pieces.end(); it++) {
+				auto step = *it;
+				assert(constraints.count(step) == 1);
+
+				if (constraints[step].size() != 0) {
+					continue;
+				}
+
+				if (constraints[step].size() == 0) {
+					constraints.erase(step);
+				}
+
+				it = pieces.erase(it);
+				complete(step);
+				result.push_back(step);
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	size_t
+	size()
+	{
+		return this->constraints.size();
+	}
+
+	bool
+	sorted()
+	{
+		char	last = -1;
+		// Ensure that we have a strongly sorted list.
+		for (auto it = pieces.begin(); it != pieces.end(); it++) {
+			if ((it != pieces.begin()) && (*it <= last)) {
+			    return false;
+			}
+			last = *it;
+		}
+
+		return true;
+	}
 private:
-	map<char, Step*>	steps;
-	string			sequence;
+	map<char, set<char>>	constraints;
+	vector<char>		pieces;
 };
 
 
 vector<string>
 readLines(const string path)
 {
-	ifstream	file(path);
-	vector<string>	lines;
+       ifstream        file(path);
+       vector<string>  lines;
 
-	for (string line; getline(file, line); ) {
-		lines.push_back(line);
-	}
-	file.close();
+       for (string line; getline(file, line); ) {
+               lines.push_back(line);
+       }
+       file.close();
 
-	return lines;
+       return lines;
 }
+
+
+const vector<string>	TestSteps = {
+	"Step C must be finished before step A can begin.",
+	"Step C must be finished before step F can begin.",
+	"Step A must be finished before step B can begin.",
+	"Step A must be finished before step D can begin.",
+	"Step B must be finished before step E can begin.",
+	"Step D must be finished before step E can begin.",
+	"Step F must be finished before step E can begin."
+};
+
 
 void
-printLines(vector<string> &lines)
+self_check_problem_ctor()
 {
-	for (auto line : lines) {
-		cout << line << endl;
-	}
+	Problem		problem(TestSteps);
+
+	assert(problem.size() == 6);
+	assert(problem.sorted());
 }
 
 
-Sum *
-parseLines
+void
+self_check_solve()
+{
+	auto expected = "CABDFE";
+	Problem		testCase(TestSteps);
+
+	auto result = testCase.solve();
+	assert(expected == result);
+}
 
 
 static void
-selfCheck()
+self_check()
 {
-
+	self_check_problem_ctor();
+	self_check_solve();
+	cerr << "self check: OK" << endl;
 }
+
 
 int
 main(int argc, char *argv[])
 {
-	selfCheck();
+	auto start = chrono::system_clock::now();
+	self_check();
+
 	for (auto i = 1; i < argc; i++) {
 		auto lines = readLines(argv[i]);
-		printLines(lines);
+
+		Problem	problem(lines);
+		cout << problem.size() << " tasks recorded." << endl;
+
+		auto result = problem.solve();
+		cout << "solution: " << result << endl;
 	}
+
+	auto finished = chrono::system_clock::now();
+	auto span = chrono::duration_cast<chrono::microseconds>(finished - start);
+	cout << "solution(s) generated in " << span.count() << "µs" << endl;
 }

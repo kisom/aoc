@@ -1,18 +1,22 @@
-CXXFLAGS :=	-Werror -Wall -std=c++14 -lre2 -g -O0 -fsanitize=address
+CXXFLAGS :=	-Werror -Wall -std=c++14 -lre2 
+
+ifdef NDEBUG
+CXXFLAGS += -O2
+else
+CXXFLAGS += -g -O0 -fsanitize=address
+endif
 
 TARGET := steps
 
 .PHONY: all
 all: $(TARGET)
 	time ./$(TARGET) $(TARGET).txt
+	time ./$(TARGET).py $(TARGET).txt
 
 print-%: ; @echo $*=$($*)
 
 $(TARGET): $(TARGET).cc
 	clang++ $(CXXFLAGS) -o $(TARGET) $(TARGET).cc
-
-# $(TARGET)-hs: $(TARGET).hs
-# 	ghc -o $@ $<
 
 .PHONY: clean
 clean:

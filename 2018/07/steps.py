@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import copy
-import pdb
+import datetime
 import re
 import sys
 from time import sleep
@@ -136,15 +136,15 @@ def sequence_timed(steps, workers, offset):
                     assignment[worker] = step
                 if len(steps) == 0:
                     break
-        s = '{:04}|\t'.format(time)
-        for worker in range(workers):
-            if worker in assignment:
-                s += assignment[worker]
-            else:
-                s += '.'
-        s += '\t| ' + result
+        #s = '{:04}|\t'.format(time)
+        #for worker in range(workers):
+        #    if worker in assignment:
+        #        s += assignment[worker]
+        #    else:
+        #        s += '.'
+        #s += '\t| ' + result
+        # print(s)
         time += 1        
-        print(s)
     return time-1, result
 
 
@@ -168,10 +168,13 @@ def main(args):
     for path in args:
         steps = parse_file(path)
         print(sequence(copy.deepcopy(steps)))
-        time, result = sequence_timed(steps, 5, 60)
-        print('{} in {}'.format(result, time))
+        #time, result = sequence_timed(steps, 5, 60)
+        #print('{} in {}'.format(result, time))
                             
 
 if __name__ == "__main__":
+    starts = datetime.datetime.now()
     self_check()
     main(sys.argv[1:])
+    finishes = datetime.datetime.now()
+    print('Finished in {}us'.format((finishes - starts).microseconds))
