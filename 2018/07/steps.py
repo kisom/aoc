@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import copy
+import pdb
 import re
 import sys
 from time import sleep
@@ -99,6 +100,21 @@ def self_check_next_task_sequenced():
     assignments = {0: 'C'}
     assert(next_task_sequenced(steps, assignments) == None)
 
+def work_available(steps, assignment, waiting, time):
+    available = find_available(waiting, time)
+    if not available:
+        return False
+    steps_copy = copy.deepcopy(steps)
+    assignment_copy = copy.deepcopy(assignment)
+    for worker in available:
+        if worker in assignment_copy:
+            step_copy = mark_done(steps_copy, assignment_copy[worker])
+            del(assignment_copy[worker])
+    next_step = next_task_sequenced(steps_copy, assignment_copy)
+    if next_step:
+        return True
+    return False
+    
 def sequence_timed(steps, workers, offset):
     time = 0
     waiting = dict.fromkeys(range(workers), 0)
@@ -106,21 +122,20 @@ def sequence_timed(steps, workers, offset):
     result = ''
 
     while len(steps) > 0:
-        available = find_available(waiting, time)
-        for worker in available:
-            if worker in assignment:
-                step = assignment[worker]
-                result += step
-                steps = mark_done(steps, step)
-                del(assignment[worker])
-                del(steps[step])                
-            step = next_task_sequenced(steps, assignment)
-            if step:
-                waiting[worker] = time + time_for(step, offset)
-                assignment[worker] = step
-        if len(steps) == 0:
-            break
-        time += 1
+        while work_available(steps, assignment, waiting, time):
+            for worker in find_available(waiting, time):
+                if worker in assignment:
+                    step = assignment[worker]
+                    result += step
+                    steps = mark_done(steps, step)
+                    del(assignment[worker])
+                    del(steps[step])                
+                step = next_task_sequenced(steps, assignment)
+                if step:
+                    waiting[worker] = time + time_for(step, offset)
+                    assignment[worker] = step
+                if len(steps) == 0:
+                    break
         s = '{:04}|\t'.format(time)
         for worker in range(workers):
             if worker in assignment:
@@ -128,14 +143,16 @@ def sequence_timed(steps, workers, offset):
             else:
                 s += '.'
         s += '\t| ' + result
+        time += 1        
         print(s)
-    return time, result
+    return time-1, result
 
 
 def self_check_sequence_timed():
     steps = copy.deepcopy(TEST_STEPS)
     time, result = sequence_timed(steps, 2, 0)
     assert(result == "CABFDE")
+    print(time)
     assert(time == 15)
 
 def self_check():
