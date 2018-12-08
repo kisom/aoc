@@ -57,7 +57,6 @@ def mark_done(steps, name):
     for step in steps.keys():
         if name in steps[step]:
             steps[step].remove(name)
-    return steps
 
 def next_task(steps):
     for step in sorted(steps.keys()):
@@ -70,7 +69,7 @@ def sequence(steps):
         step = next_task(steps)
         result += step
         del(steps[step])
-        steps = mark_done(steps, step)
+        mark_done(steps, step)
     return result
 
 
@@ -127,7 +126,7 @@ def sequence_timed(steps, workers, offset):
                 if worker in assignment:
                     step = assignment[worker]
                     result += step
-                    steps = mark_done(steps, step)
+                    mark_done(steps, step)
                     del(assignment[worker])
                     del(steps[step])                
                 step = next_task_sequenced(steps, assignment)
@@ -136,14 +135,14 @@ def sequence_timed(steps, workers, offset):
                     assignment[worker] = step
                 if len(steps) == 0:
                     break
-        #s = '{:04}|\t'.format(time)
-        #for worker in range(workers):
-        #    if worker in assignment:
-        #        s += assignment[worker]
-        #    else:
-        #        s += '.'
-        #s += '\t| ' + result
-        # print(s)
+        s = '{:04}|\t'.format(time)
+        for worker in range(workers):
+            if worker in assignment:
+                s += assignment[worker]
+            else:
+                s += '.'
+        s += '\t| ' + result
+        print(s)
         time += 1        
     return time-1, result
 
@@ -168,8 +167,8 @@ def main(args):
     for path in args:
         steps = parse_file(path)
         print(sequence(copy.deepcopy(steps)))
-        #time, result = sequence_timed(steps, 5, 60)
-        #print('{} in {}'.format(result, time))
+        time, result = sequence_timed(steps, 5, 0)
+        print('{} in {}'.format(result, time))
                             
 
 if __name__ == "__main__":

@@ -7,12 +7,7 @@
 #include <set>
 #include <vector>
 
-#include <re2/re2.h>
-
 using namespace std;
-
-
-// static re2::RE2	stepRegex("Step (.) must be finished before step (.) can begin.");
 
 
 class Problem {
@@ -21,21 +16,10 @@ public:
 	Problem(vector<string> lines)
 	{
 		for (auto line : lines) {
-			char	name = line[36];
 			char	dependency = line[5];
-			// auto	matched = re2::RE2::FullMatch(line, stepRegex, &dependency, &name);
-
-			// assert(matched);
+			char	name = line[36];
 			this->constraint(name, dependency);
 		}
-
-		// Populate vector.
-		for (auto it = constraints.begin();
-		     it != constraints.end(); it++) {
-			pieces.push_back(it->first);
-		}
-
-		sort(pieces.begin(), pieces.end());
 	}
 
 	void
@@ -51,9 +35,10 @@ public:
 			constraints[dependency] = set<char>();
 		}
 
-		auto temp = constraints[name];
-		temp.insert(dependency);
-		constraints[name] = temp;
+		constraints[name].insert(dependency);
+		// auto temp = constraints[name];
+		// temp.insert(dependency);
+		// constraints[name] = temp;
 	}
 
 	void
@@ -72,21 +57,14 @@ public:
 	{
 		string	result;
 		while (constraints.size() > 0) {
-			for (auto it = pieces.begin(); it != pieces.end(); it++) {
-				auto step = *it;
-				assert(constraints.count(step) == 1);
-
-				if (constraints[step].size() != 0) {
+			for (auto it : constraints) {
+				if (it.second.size() != 0) {
 					continue;
 				}
 
-				if (constraints[step].size() == 0) {
-					constraints.erase(step);
-				}
-
-				it = pieces.erase(it);
-				complete(step);
-				result.push_back(step);
+				constraints.erase(it.first);
+				complete(it.first);
+				result.push_back(it.first);
 				break;
 			}
 		}
@@ -100,23 +78,8 @@ public:
 		return this->constraints.size();
 	}
 
-	bool
-	sorted()
-	{
-		char	last = -1;
-		// Ensure that we have a strongly sorted list.
-		for (auto it = pieces.begin(); it != pieces.end(); it++) {
-			if ((it != pieces.begin()) && (*it <= last)) {
-			    return false;
-			}
-			last = *it;
-		}
-
-		return true;
-	}
 private:
 	map<char, set<char>>	constraints;
-	vector<char>		pieces;
 };
 
 
@@ -152,7 +115,6 @@ self_check_problem_ctor()
 	Problem		problem(TestSteps);
 
 	assert(problem.size() == 6);
-	assert(problem.sorted());
 }
 
 

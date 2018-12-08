@@ -1,7 +1,8 @@
-CXXFLAGS :=	-Werror -Wall -std=c++14 -lre2 
+CXXFLAGS :=	-Werror -Wall -std=c++14
+FLAVOR   ?=	DEBUG
 
-ifdef NDEBUG
-CXXFLAGS += -O2
+ifeq ($(FLAVOR),RELEASE)
+CXXFLAGS += -O3
 else
 CXXFLAGS += -g -O0 -fsanitize=address
 endif

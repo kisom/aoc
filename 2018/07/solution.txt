@@ -1,0 +1,145 @@
+This might be my favourite of the exercises so far, probably because it
+reminds me of the constraint programming and first-order logic stuff; it's
+a close tie maybe with day 5.
+
+I again did the first pass in Python and I'm working on the follow-up
+C++ version as I have time.
+
+The first thing I do is parse the file into a bunch of lines, and use a
+regex to pick out the task name and its dependency. One thing here that
+I thought is that maybe this was going to be a slowdown, so I did some
+testing around this. It turns out that it only adds about 200µs to the
+run time for part 1 - using ASAN was a much larger performance impact.
+Removing that brought my run times for part 1 from about 2500µs to
+about 750µs on average.
+
+The heart of both of my part 1 solvers is a map of task name to a `set`
+of its dependencies. In C++, I was able to rely on the fact that maps
+maintain a weak ordering of keys, so the initial parsing was all the
+sorting that I needed to do. In Python 3, dictionaries are insertion
+ordered, so I had to sort the `.keys()` list in order to do this. I chose
+a set because it's a type focused on membership; Python supports the
+`in` keyword, but semantically, we're thinking about sets.
+
+As I look at each item in the list, I have to figure if it has any
+unresolved dependencies - if it has none, I remove it from the map,
+and iterate over all the other constraints, removing as needed from
+the set.
+
+```python
+def mark_done(steps, name):
+    for step in steps.keys():
+        if name in steps[step]:
+            steps[step].remove(name)
+
+def next_task(steps):
+    for step in sorted(steps.keys()):
+        if len(steps[step]) == 0:
+            return step
+
+def sequence(steps):
+    result = ""
+    while len(steps) > 0:
+        step = next_task(steps)
+        result += step
+        del(steps[step])
+        mark_done(steps, step)
+    return result
+```
+
+As with all of these, there's a fair amount of cleaning up that I can do,
+but it's not bad as it stands.
+
+```c++
+void
+complete(char dependency)
+{
+	for (auto step : constraints) {
+		if (step.second.count(dependency) == 0) {
+			continue;
+		}
+		constraints[step.first].erase(dependency);
+	}
+}
+
+string
+solve()
+{
+	string	result;
+	while (constraints.size() > 0) {
+		for (auto it : constraints) {
+			if (it.second.size() != 0) {
+				continue;
+			}
+
+			constraints.erase(it.first);
+			complete(it.first);
+			result.push_back(it.first);
+			break;
+		}
+	}
+
+	return result;
+}
+```
+
+The self checks are pretty handy: for example, I write C++ in Vim and I
+have a shortcut to just run make - a fast way to build and test in one
+sweep. I don't have that quite set up in Emacs (where I write Python),
+but it works pretty well still. I like that it catches regressions
+right away, and makes sure not to even bother with the larger input if
+it can't get the small test input right.
+
+Part 2 involved some subtlety (a fairly natural consequence of concurrency
+problems); it's important to note that while the test input will give you
+some confidence, there's a corner case it doesn't cover that was crucial
+to solving my particular set of inputs. I imagine it's a relatively
+common scenario.
+
+In particular, what can happen is the following: 
+
++ At least one worker is idle in a given time step.
++ A later worker in the iteration finishes a task that unblocks another.
++ The earlier worker *should* pick up the unblocked task - but if you
+  iterate over them in order (like I was) you'll miss that, and you'll
+  calculate at least a second later than you should.
+
+In Python, I used two dictionaries for this: one to keep track of what
+task each worker was assigned to, and one to keep track of when the
+worker would complete their task.
+
+The solution looked like this:
+
++ I look to see if any work is available, which boils down to figuring
+  out if I have workers available and tasks for them to do:
+
+  + If there aren't any workers available, then we're going say there's
+    no work available.
+
+  + I copy the two dictionaries and remove all the assignments that the
+    workers were working on. Then I look for the next task that would
+    be available given the copied dictionaries.
+
+  + Return whether any tasks are available.
+
++ I get the next available worker (this is a duplicate of the first
+  step before...).
+
++ If that worker was assigned to another task, that means it's finished;
+  I mark this task as complete the same way I did before.
+
++ Then I get the next task to be completed. If there aren't any, it's
+  time to move on. This is also a duplicate of work done above.
+
++ Assign the task to the worker and mark the time it'll be completed.
+
++ Repeat the above for as long as there is work available.
+
++ Increment the time step.
+
++ Repeat all of the above for as long as there are still tasks remaining
+  to be done.
+
+There's some duplicated effort and lots of what feels like redundant
+copying of dictionaries. If I get around to working on the C++ version
+of part 2, I'd like to revisit this.
