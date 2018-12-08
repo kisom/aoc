@@ -113,14 +113,14 @@ The solution looked like this:
 + I look to see if any work is available, which boils down to figuring
   out if I have workers available and tasks for them to do:
 
-  + If there aren't any workers available, then we're going say there's
-    no work available.
+    + If there aren't any workers available, then we're going say there's
+      no work available.
 
-  + I copy the two dictionaries and remove all the assignments that the
-    workers were working on. Then I look for the next task that would
-    be available given the copied dictionaries.
+    + I copy the two dictionaries and remove all the assignments that the
+      workers were working on. Then I look for the next task that would
+      be available given the copied dictionaries.
 
-  + Return whether any tasks are available.
+    + Return whether any tasks are available.
 
 + I get the next available worker (this is a duplicate of the first
   step before...).
