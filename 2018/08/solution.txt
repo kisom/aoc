@@ -1,0 +1,65 @@
+Today's was particularly easy for me - in fact, apart from day 1,
+it might be the easiest. Tree data structures and recursion are just
+something I'm pretty familiar with, I guess. I did it directly in C++
+and it took me about a half hour for both parts. This is also definitely
+a result of building familiarity with the standard library again - one
+thing I'm doing now is looking through the algorithms and datastructures
+on cppreference.com to see what would help so that I can practice things
+specifically.
+
+I've defined a class `Node`:
+
+```c++
+class Node {
+public:
+	vector<Node>	children;
+	vector<int>	metadata;
+};
+```
+
+This is really just a struct (in C++, structs are classes where everything
+is public by default and you have to refer to them as `struct T`) but it
+means I didn't have to do
+
+```c++
+typedef struct _Node {
+	vector<struct _Node>	children;
+	vector<int>		metadata;
+} Node;
+```
+
+Parsing a tree is a recursive function:
+
+1. Read the header (`nchildren` and `nmetadata`) into two stack
+   variables, and use these to reserve space in the node's two
+   vectors.
+2. I then read as many children as the header indicates - this is
+   recursive but I don't think this is tail recursive so this could be
+   a problem later. This is the half-hour solution, though :)
+3. I then read as many ints as metadata as the header indicates.
+
+To sum all the values, I follow a similar recursive pattern:
+
+1. Sum all the metadata variables.
+2. Add the sum of all the children to the result.
+3. Return this.
+
+The second part wasn't too much more work:
+
+1. If a node doesn't have children, return the sum of the metadata.
+2. For each metadata value *x* within `0 < (x-1) < children.size()`,
+   add the value of this node to the result.
+3. Return this.
+
+This was fun, but I didn't find it particularly challenging. There are some
+ways I could make it harder, though:
+
+1. Memoize the results of nodeValue - but I'm not sure the overhead
+   is really faster than the result for the input sizes I have.
+2. Extend the node to a better class that includes an overloaded insertion
+   operator so that I can
+3. Generate random, very large nodes to use for testing improvements
+4. Make the recursive solutions tail recursive.
+
+I barely found time to do this, so we'll see; it was really nice having
+a quick puzzle.
