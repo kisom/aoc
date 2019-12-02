@@ -1,18 +1,12 @@
 package main
 
-// Note: no associated test file because it's in intcode.go.
+// Note: no associated test file because it's in package ic.
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/kisom/advent2019/ic"
-)
-
-const (
-	OpAdd  = 1
-	OpMul  = 2
-	OpHalt = 99
+	"github.com/kisom/aoc/advent2019/ic"
 )
 
 var gravityAssistProgram = []int{

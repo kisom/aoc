@@ -16,26 +16,10 @@ func cmpis(a, b []int) bool {
 	return true
 }
 
-func isVMinExpectedState(vm *VM, final []int) bool {
-	return cmpis(vm.mem, final)
-}
-
-func runTestVM(prog []int, final []int, t *testing.T) {
-	vm := Load(prog)
-	err := vm.Run()
-	if err != nil {
-		t.Error(err)
-	}
-
-	if !isVMinExpectedState(vm, final) {
-		t.Errorf("VM is not in an expected state:\nexp: %+v\ncur: %+v",
-			final, vm.mem)
-	}
-}
-
 type vmTest struct {
 	prog  []int
 	final []int
+	mods  []mod
 }
 
 var vmTestCases = []vmTest{
@@ -66,11 +50,18 @@ var vmTestCases = []vmTest{
 		prog:  []int{1, 1, 1, 4, 99, 5, 6, 0, 99},
 		final: []int{30, 1, 1, 4, 2, 5, 6, 0, 99},
 	},
+	vmTest{
+		prog:  []int{0, 0, 1, -1, 99, 5, 6, 0, 99},
+		final: []int{30, 1, 1, 4, 2, 5, 6, 0, 99},
+		mods: []mod{
+			Mod(0, 1), Mod(1, 1), Mod(3, 4),
+		},
+	},
 }
 
 func TestVM(t *testing.T) {
 	for _, c := range vmTestCases {
-		prog, err := Run(c.prog)
+		prog, err := Run(c.prog, c.mods...)
 		if err != nil {
 			t.Error(err)
 		}
@@ -79,6 +70,13 @@ func TestVM(t *testing.T) {
 			t.Errorf("VM is not in an expected state:\nexp: %+v\ncur: %+v",
 				c.final, prog)
 		}
-		runTestVM(c.prog, c.final, t)
+	}
+}
+
+func TestErr(t *testing.T) {
+	prog := []int{-1, 1, 1, 1}
+	_, err := Run(prog)
+	if err == nil {
+		t.Error("expected an error with opcode=-1")
 	}
 }

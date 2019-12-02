@@ -1,4 +1,4 @@
-module github.com/kisom/advent2019
+module github.com/kisom/aoc/advent2019
 
 go 1.13
 

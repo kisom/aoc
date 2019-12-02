@@ -34,11 +34,12 @@ func readFile(path string) ([]int, error) {
 }
 
 func fuelCost(module int) int {
+	fuelCost := 0
+
 	cost := (module / 3) - 2
-	fuelCost := cost
 	for cost > 0 {
-		cost = cost/3 - 2
 		fuelCost += cost
+		cost = cost/3 - 2
 	}
 
 	return fuelCost

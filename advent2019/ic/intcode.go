@@ -1,6 +1,8 @@
 package ic
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	OpAdd  = 1
