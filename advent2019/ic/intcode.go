@@ -35,11 +35,7 @@ func Run(prog []int, mods ...mod) ([]int, error) {
 
 	ip := 0
 	run := true
-	for {
-		if !run {
-			break
-		}
-
+	for run {
 		op := mem[ip]
 		switch op {
 		case OpAdd:

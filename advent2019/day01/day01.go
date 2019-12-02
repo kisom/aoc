@@ -36,12 +36,8 @@ func readFile(path string) ([]int, error) {
 func fuelCost(module int) int {
 	cost := (module / 3) - 2
 	fuelCost := cost
-	for {
+	for cost > 0 {
 		cost = cost/3 - 2
-		if cost < 1 {
-			break
-		}
-
 		fuelCost += cost
 	}
 
