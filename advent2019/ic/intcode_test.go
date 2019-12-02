@@ -1,4 +1,4 @@
-package intcode
+package ic
 
 import "testing"
 

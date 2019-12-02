@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kisom/advent2019/intcode"
+	"github.com/kisom/advent2019/ic"
 )
 
 const (
@@ -28,13 +28,13 @@ var gravityAssistProgram = []int{
 }
 
 func part1() {
-	prog, err := intcode.Run(
+	prog, err := ic.Run(
 		gravityAssistProgram,
 		// before running the program, replace position 1 with
 		// the value 12 and replace position 2 with the value
 		// 2.
-		intcode.Mod(1, 12),
-		intcode.Mod(2, 2),
+		ic.Mod(1, 12),
+		ic.Mod(2, 2),
 	)
 
 	if err != nil {
@@ -48,10 +48,10 @@ func part1() {
 func part2() {
 	for noun := 0; noun < 99; noun++ {
 		for verb := 0; verb < 99; verb++ {
-			prog, err := intcode.Run(
+			prog, err := ic.Run(
 				gravityAssistProgram,
-				intcode.Mod(1, noun),
-				intcode.Mod(2, verb),
+				ic.Mod(1, noun),
+				ic.Mod(2, verb),
 			)
 			if err != nil {
 				continue
