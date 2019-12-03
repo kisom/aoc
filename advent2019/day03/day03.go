@@ -171,6 +171,9 @@ func intersections(m1, m2 map[point]int) []intersect {
 
 	for p, z := range m1 {
 		if z2, ok := m2[p]; ok {
+			// +2 because the intersection counts as a
+			// step for both wires, this is the one thing
+			// that tripped me up
 			isects = append(isects, intersect{p, z + z2 + 2})
 		}
 	}

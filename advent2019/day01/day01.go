@@ -58,8 +58,7 @@ func calculateFuel(modules []int) int {
 func calculateFuel2(modules []int) int {
 	fuel := 0
 	for _, module := range modules {
-		moduleFuel := fuelCost(module)
-		fuel += moduleFuel
+		fuel += fuelCost(module)
 	}
 
 	return fuel

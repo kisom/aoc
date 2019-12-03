@@ -54,6 +54,7 @@ func part2() {
 			result := prog[0]
 			if result == 19690720 {
 				fmt.Println(noun, verb)
+				return
 			}
 		}
 	}
