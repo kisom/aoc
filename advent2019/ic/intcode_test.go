@@ -23,7 +23,7 @@ type vmTest struct {
 }
 
 var vmTestCases = []vmTest{
-	vmTest{
+	{
 		prog: []int{
 			1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50,
 		},
@@ -34,23 +34,23 @@ var vmTestCases = []vmTest{
 			30, 40, 50,
 		},
 	},
-	vmTest{
+	{
 		prog:  []int{1, 0, 0, 0, 99},
 		final: []int{2, 0, 0, 0, 99},
 	},
-	vmTest{
+	{
 		prog:  []int{2, 3, 0, 3, 99},
 		final: []int{2, 3, 0, 6, 99},
 	},
-	vmTest{
+	{
 		prog:  []int{2, 4, 4, 5, 99, 0},
 		final: []int{2, 4, 4, 5, 99, 9801},
 	},
-	vmTest{
+	{
 		prog:  []int{1, 1, 1, 4, 99, 5, 6, 0, 99},
 		final: []int{30, 1, 1, 4, 2, 5, 6, 0, 99},
 	},
-	vmTest{
+	{
 		prog:  []int{0, 0, 1, -1, 99, 5, 6, 0, 99},
 		final: []int{30, 1, 1, 4, 2, 5, 6, 0, 99},
 		mods: []mod{

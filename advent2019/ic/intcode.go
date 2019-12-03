@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	OpAdd  = 1
-	OpMul  = 2
-	OpHalt = 99
+	opAdd  = 1
+	opMul  = 2
+	opHalt = 99
 )
 
 type mod struct {
@@ -15,7 +15,7 @@ type mod struct {
 	Val int
 }
 
-// A mod encodes a change to the program to be made at runtime.
+// Mods encode changes to the program to be made at runtime.
 func Mod(pos, val int) mod {
 	return mod{
 		Pos: pos,
@@ -40,19 +40,19 @@ func Run(prog []int, mods ...mod) ([]int, error) {
 	for run {
 		op := mem[ip]
 		switch op {
-		case OpAdd:
+		case opAdd:
 			arg1 := mem[ip+1]
 			arg2 := mem[ip+2]
 			dest := mem[ip+3]
 			mem[dest] = mem[arg1] + mem[arg2]
 			ip += 4
-		case OpMul:
+		case opMul:
 			arg1 := mem[ip+1]
 			arg2 := mem[ip+2]
 			dest := mem[ip+3]
 			mem[dest] = mem[arg1] * mem[arg2]
 			ip += 4
-		case OpHalt:
+		case opHalt:
 			run = false
 		default:
 			return mem, fmt.Errorf("VM: invalid opcode [ip=%d]", ip)
