@@ -10,18 +10,18 @@ import (
 
 // Run executes function f, printing total runtime and allocation
 // sizes at the end.
-func Run(f func()) {
-	var start, end time.Time
+func Run(label string, f func()) {
+	var start, end int64
 	var mem runtime.MemStats
 
-	start = time.Now()
+	start = time.Now().UnixNano()
 	f()
-	end = time.Now()
+	end = time.Now().UnixNano()
 
 	runtime.ReadMemStats(&mem)
-	runtime := end.Sub(start).Milliseconds()
+	runtime := (end - start) / 1000
 	tAlloc := mem.TotalAlloc / 1024
-	alloc := mem.Alloc / 1024
-	log.Printf("complete in %dms, total allocated %d kB, current heap allocation %d kB",
-		runtime, tAlloc, alloc)
+	alloc := mem.HeapAlloc / 1024
+	log.Printf("%s: complete in %dus, total allocated %d kB, current heap allocation %d kB",
+		label, runtime, tAlloc, alloc)
 }

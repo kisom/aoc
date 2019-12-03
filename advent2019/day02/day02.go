@@ -62,6 +62,6 @@ func part2() {
 }
 
 func main() {
-	inst.Run(part1)
-	inst.Run(part2)
+	inst.Run("day02p1", part1)
+	inst.Run("day02p2", part2)
 }
