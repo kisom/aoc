@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/kisom/aoc/advent2019/inst"
 )
 
 var wire1 = []string{
@@ -221,6 +223,6 @@ func part2() {
 }
 
 func main() {
-	part1()
-	part2()
+	inst.Run(part1)
+	inst.Run(part2)
 }

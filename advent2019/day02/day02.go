@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/kisom/aoc/advent2019/ic"
+	"github.com/kisom/aoc/advent2019/inst"
 )
 
 var gravityAssistProgram = []int{
@@ -61,6 +62,6 @@ func part2() {
 }
 
 func main() {
-	part1()
-	part2()
+	inst.Run(part1)
+	inst.Run(part2)
 }

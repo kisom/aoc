@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/kisom/aoc/advent2019/inst"
 	"github.com/kisom/goutils/die"
 )
 
@@ -64,12 +65,23 @@ func calculateFuel2(modules []int) int {
 	return fuel
 }
 
-func main() {
+func part1() {
 	modules, err := readFile("input.txt")
 	die.If(err)
 
 	fuel := calculateFuel(modules)
-	fmt.Printf("Total fuel: %d\n", fuel)
-	fuel = calculateFuel2(modules)
-	fmt.Printf("Total calibrated fuel: %d\n", fuel)
+	fmt.Println(fuel)
+}
+
+func part2() {
+	modules, err := readFile("input.txt")
+	die.If(err)
+
+	fuel := calculateFuel2(modules)
+	fmt.Println(fuel)
+}
+
+func main() {
+	inst.Run(part1)
+	inst.Run(part2)
 }
