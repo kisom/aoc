@@ -13,7 +13,7 @@ read_deltas(std::istream &stream)
 		stream >> delta;
 		deltas.push_back(delta);
 	}
-	return deltas;	
+	return deltas;
 }
 
 static int
@@ -35,7 +35,7 @@ calibrate(std::istream &stream, int frequency)
 		stream >> delta;
 		deltas.push_back(delta);
 	}
-	
+
 	return calibrate_vec(deltas, frequency);
 }
 
@@ -98,12 +98,13 @@ assert(std::string msg, int expected, int actual)
 		return;
 	}
 
-	std::cerr << msg << ": expected " << expected << " but have " 
+	std::cerr << msg << ": expected " << expected << " but have "
 		  << actual << std::endl;
 	std::abort();
 }
 
-static void self_check_calibrate(void)
+static void
+self_check_calibrate(void)
 {
 	auto test_case_1 = "+1\n-2\n+3\n+1";
 	auto test_case_2 = "+1\n+1\n+1\n";
@@ -116,7 +117,8 @@ static void self_check_calibrate(void)
 	std::cout << "calibration self check: OK\n";
 }
 
-static void self_check_calibrate_detect_repeating(void)
+static void
+self_check_calibrate_detect_repeating(void)
 {
 	auto test_case_1 = "+1\n-2\n+3\n+1\n+1\n-2\n";
 	auto test_case_2 = "+1\n-1\n";
@@ -131,16 +133,18 @@ static void self_check_calibrate_detect_repeating(void)
 	std::cout << "calibration detecting repeats self check: OK\n";
 }
 
-static void self_check(void)
+static void
+self_check(void)
 {
 	self_check_calibrate();
 	self_check_calibrate_detect_repeating();
 }
 
-int main(void)
+int
+main(void)
 {
 	self_check();
-	
+
 	auto deltas = read_deltas(std::cin);
 	auto out = calibrate_vec(deltas, 0);
 	auto repeated = calibrate_detecting_repeats_vec(deltas, 0);
