@@ -1,45 +1,18 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/kisom/aoc/advent2019/inst"
 )
 
-var minRange = [6]byte{2, 3, 5, 7, 4, 0} // dec by 1
-var maxRange = [6]byte{7, 0, 6, 9, 4, 9} // inc by 1
+var minRange = 235741
+var maxRange = 706948
 
-type counter struct {
-	v   [6]byte
-	max [6]byte
-}
-
-func (c *counter) next() bool {
-	for i := 5; i >= 0; i-- {
-		c.v[i]++
-		if c.v[i] != 0 {
-			break
-		}
-	}
-
-	if bytes.Equal(c.v[:], c.max[:]) {
-		return false
-	}
-
-	return true
-}
-
-func newCounter(min, max [6]byte) *counter {
-	c := &counter{}
-	copy(c.v[:], min[:])
-	copy(c.max[:], max[:])
-	return c
-}
-
-func twoAdjacent(c *counter) bool {
+func twoAdjacent(n int) bool {
+	s := fmt.Sprintf("%0d", n)
 	for i := 1; i < 6; i++ {
-		if c.v[i-1] == c.v[i] {
+		if s[i-1] == s[i] {
 			return true
 		}
 	}
@@ -47,19 +20,20 @@ func twoAdjacent(c *counter) bool {
 	return false
 }
 
-func onlyTwoAdjacent(c *counter) bool {
-	run := c.v[0]
+func onlyTwoAdjacent(n int) bool {
+	s := fmt.Sprintf("%0d", n)
+	run := s[0]
 	count := 1
 	ok := false
 
 	for i := 1; i < 6; i++ {
-		if c.v[i] == run {
+		if s[i] == run {
 			count++
 		} else {
 			if count == 2 {
 				ok = true
 			}
-			run = c.v[i]
+			run = s[i]
 			count = 1
 		}
 	}
@@ -70,11 +44,13 @@ func onlyTwoAdjacent(c *counter) bool {
 	return ok
 }
 
-func isMonotic(c *counter) bool {
+func isMonotic(n int) bool {
+	s := fmt.Sprintf("%d", n)
+
 	// relies on the fact that ASCII numerics are digit + 0x30, so
 	// they can be compared directly without parsing.
 	for i := 1; i < 6; i++ {
-		if c.v[i] < c.v[i-1] {
+		if s[i] < s[i-1] {
 			return false
 		}
 	}
@@ -82,11 +58,10 @@ func isMonotic(c *counter) bool {
 	return true
 }
 
-func findCandidate1(min, max [6]byte) int {
+func findCandidate1(min, max int) int {
 	count := 0
-	counter := newCounter(min, max)
-	for counter.next() {
-		if twoAdjacent(counter) && isMonotic(counter) {
+	for i := min; i <= max; i++ {
+		if twoAdjacent(i) && isMonotic(i) {
 			count++
 		}
 	}
@@ -94,11 +69,10 @@ func findCandidate1(min, max [6]byte) int {
 	return count
 }
 
-func findCandidate2(min, max [6]byte) int {
+func findCandidate2(min, max int) int {
 	count := 0
-	counter := newCounter(min, max)
-	for counter.next() {
-		if onlyTwoAdjacent(counter) && isMonotic(counter) {
+	for i := min; i <= max; i++ {
+		if onlyTwoAdjacent(i) && isMonotic(i) {
 			count++
 		}
 	}
