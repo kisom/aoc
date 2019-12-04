@@ -17,6 +17,10 @@ AoC2019 stats
 |       | day03_test.go         | 38    |
 |       | <total>               | 237   |
 +-------+-----------------------+-------+
+| 04    | day04.go              | 74    |
+|       | day04_test.go         | 37    |
+|       | <total>               | 111   | 
++-------+-----------------------+-------+
 
 .:[ perf ]:.
 +=======+===============+===============+
@@ -31,3 +35,30 @@ AoC2019 stats
 | 03	| 0.35		| 45764		|
 | 03t	| 0.31		| 60848		|
 +-------+---------------+---------------+
+| 03    | 0.51          | 46672         |
+| 04t   | 0.45          | 60612         |
++-------+---------------+---------------+
+
+~/code/aoc/advent2019
+(0) <hephaestus:kyle> $ make
+for day in day01 day02 day03 day04 ;			\
+do 					\
+	( cd $day && go run $day.go );	\
+done
+3252897
+2019/12/03 21:25:43 day01p1: complete in 296us, total allocated 122 kB, current heap allocation 122 kB
+4876469
+2019/12/03 21:25:43 day01p2: complete in 87us, total allocated 143 kB, current heap allocation 143 kB
+3562624
+2019/12/03 21:25:43 day02p1: complete in 30us, total allocated 115 kB, current heap allocation 115 kB
+82 98
+2019/12/03 21:25:43 day02p2: complete in 3839us, total allocated 10411 kB, current heap allocation 3060 kB
+768
+2019/12/03 21:25:43 day03p1: complete in 125060us, total allocated 30810 kB, current heap allocation 18354 kB
+8684
+2019/12/03 21:25:44 day03p2: complete in 69309us, total allocated 61541 kB, current heap allocation 18356 kB
+1178
+2019/12/03 21:25:44 day04p1: complete in 104436us, total allocated 10424 kB, current heap allocation 2693 kB
+763
+2019/12/03 21:25:44 day04p2: complete in 68517us, total allocated 20519 kB, current heap allocation 987 kB
+
