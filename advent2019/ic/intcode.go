@@ -21,7 +21,7 @@ var argCount = map[int]int{
 	opAdd:    2,
 	opMul:    2,
 	opInput:  0,
-	opOutput: 0,
+	opOutput: 1,
 	opJT:     2,
 	opJF:     2,
 	opLT:     2,
@@ -29,26 +29,16 @@ var argCount = map[int]int{
 	opHalt:   0,
 }
 
-type mod struct {
-	Pos int
-	Val int
-}
-
-// Mods encode changes to the program to be made at runtime.
-func Mod(pos, val int) mod {
-	return mod{
-		Pos: pos,
-		Val: val,
+func fetchArgs(mem []int, ip, params, count int) []int {
+	if count == 0 {
+		return nil
 	}
-}
 
-func fetchArgs(mem *[]int, ip, params, count int) []int {
 	args := make([]int, 0, count)
-
 	for i := 1; i <= count; i++ {
-		arg := (*mem)[ip+i]
+		arg := mem[ip+i]
 		if params%10 == 0 {
-			arg = (*mem)[arg]
+			arg = mem[arg]
 		}
 		params /= 10
 
@@ -62,7 +52,11 @@ func fetchArgs(mem *[]int, ip, params, count int) []int {
 // the runs it, returning the program. For Day 2, all of the results
 // are in memory position 0, but I don't want to make that assumption
 // for the future.
-func Run(prog []int, r io.Reader, mods ...mod) ([]int, error) {
+func Run(prog []int, rw io.ReadWriter, mods ...mod) ([]int, error) {
+	if rw == nil {
+		rw = Console() // readwriter.go
+	}
+
 	mem := make([]int, len(prog))
 	copy(mem, prog)
 
@@ -75,7 +69,7 @@ func Run(prog []int, r io.Reader, mods ...mod) ([]int, error) {
 	for run {
 		op := mem[ip] % 100
 		params := mem[ip] / 100
-		args := fetchArgs(&mem, ip, params, argCount[op%100])
+		args := fetchArgs(mem, ip, params, argCount[op%100])
 		switch op % 100 {
 		case opAdd:
 			dest := mem[ip+3]
@@ -86,40 +80,42 @@ func Run(prog []int, r io.Reader, mods ...mod) ([]int, error) {
 			mem[dest] = args[0] * args[1]
 			ip += 4
 		case opInput:
-			fmt.Printf("? ")
 			var arg int
-			fmt.Fscan(r, &arg)
+			fmt.Fprintf(rw, "? ")
+			fmt.Fscan(rw, &arg)
+
 			dest := mem[ip+1]
 			mem[dest] = arg
 			ip += 2
 		case opOutput:
-			dest := mem[ip+1]
-			fmt.Printf("%08d: %d\n", dest, mem[dest])
+			fmt.Fprintln(rw, args[0])
 			ip += 2
 		case opJT:
 			if args[0] != 0 {
 				ip = args[1]
 			} else {
-				ip += 2
+				ip += 3
 			}
 		case opJF:
 			if args[0] == 0 {
 				ip = args[1]
 			} else {
-				ip += 2
+				ip += 3
 			}
 		case opLT:
+			dest := mem[ip+3]
 			if args[0] < args[1] {
-				mem[ip+3] = 1
+				mem[dest] = 1
 			} else {
-				mem[ip+3] = 0
+				mem[dest] = 0
 			}
 			ip += 4
 		case opEQ:
+			dest := mem[ip+3]
 			if args[0] == args[1] {
-				mem[ip+3] = 1
+				mem[dest] = 1
 			} else {
-				mem[ip+3] = 0
+				mem[dest] = 0
 			}
 			ip += 4
 		case opHalt:
@@ -130,4 +126,24 @@ func Run(prog []int, r io.Reader, mods ...mod) ([]int, error) {
 	}
 
 	return mem, nil
+}
+
+func Dump(mem []int, w io.Writer) {
+	for i := 0; i < 10; i++ {
+		fmt.Fprintf(w, "\t%05d", i)
+	}
+	fmt.Fprintln(w)
+	i := 0
+	fmt.Fprintf(w, "%05d", i)
+	for i < len(mem) {
+		fmt.Fprintf(w, "\t%05d", mem[i])
+		i++
+		if i%10 == 0 {
+			fmt.Fprintf(w, "\n%05d", i)
+		}
+	}
+
+	if len(mem)%10 != 0 {
+		fmt.Fprintln(w)
+	}
 }

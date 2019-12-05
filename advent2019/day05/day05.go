@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
-	"testing/iotest"
 
 	"github.com/kisom/aoc/advent2019/ic"
+	"github.com/kisom/aoc/advent2019/inst"
 )
 
 var diagnosticProgram = []int{
@@ -67,8 +66,7 @@ var diagnosticProgram = []int{
 }
 
 func part1() {
-	buf := iotest.NewReadLogger("", bytes.NewBufferString("1"))
-	_, err := ic.Run(diagnosticProgram, buf)
+	_, err := ic.Run(diagnosticProgram, ic.Canned("1"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -76,35 +74,7 @@ func part1() {
 }
 
 func part2() {
-	buf := iotest.NewReadLogger("", bytes.NewBufferString("5"))
-	_, err := ic.Run(diagnosticProgram, buf)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-}
-
-// diagnostic wasn't providing any output, so I wrote this to check
-// the new instructions.
-func testProgram() {
-	prog := []int{3, 4, 1101, 1, 0, 5, 4, 5, 99}
-	prog, err := ic.Run(prog, os.Stdin)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	fmt.Println(prog)
-}
-
-func testProgram2() {
-	prog := []int{
-		3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20,
-		1006, 20, 31, 1106, 0, 36, 98, 0, 0, 1002, 21, 125,
-		20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101,
-		1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99,
-	}
-
-	prog, err := ic.Run(prog, os.Stdin)
+	_, err := ic.Run(diagnosticProgram, ic.Canned("5"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -112,7 +82,6 @@ func testProgram2() {
 }
 
 func main() {
-	// inst.Run("day05p1", part1)
-	// inst.Run("day05p2", part2)
-	testProgram2()
+	inst.Run("day05p1", part1)
+	inst.Run("day05p2", part2)
 }

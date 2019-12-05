@@ -62,3 +62,10 @@ done
 763
 2019/12/03 21:25:44 day04p2: complete in 68517us, total allocated 20519 kB, current heap allocation 987 kB
 
+
++=====+===========+===========+
+| Day | Repo SLOC | Test SLOC |
++=====+===========+===========+
+|  05 |    663	  |     220   |
++-----+-----------+-----------+
+
