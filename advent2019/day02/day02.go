@@ -24,7 +24,7 @@ var gravityAssistProgram = []int{
 
 func part1() {
 	prog, err := ic.Run(
-		gravityAssistProgram,
+		gravityAssistProgram, nil,
 		// before running the program, replace position 1 with
 		// the value 12 and replace position 2 with the value
 		// 2.
@@ -44,7 +44,7 @@ func part2() {
 	for noun := 0; noun < 99; noun++ {
 		for verb := 0; verb < 99; verb++ {
 			prog, err := ic.Run(
-				gravityAssistProgram,
+				gravityAssistProgram, nil,
 				ic.Mod(1, noun),
 				ic.Mod(2, verb),
 			)
