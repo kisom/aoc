@@ -173,3 +173,5 @@ ship's thermal radiator controller. This diagnostic test suite only
 outputs one number, the diagnostic code.
 
 What is the diagnostic code for system ID 5?
+
+Your puzzle answer was 2808771.
