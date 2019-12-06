@@ -1,68 +1,73 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"strings"
 )
 
+// Graph is a directed graph.
 type Graph struct {
-	Nodes  map[string]bool
-	Edges  map[string]map[string]bool
-	Direct map[string]string
+	nodes   map[string]bool
+	edges   map[string]map[string]bool
+	reverse map[string]map[string]bool
 }
 
+// NewGraph must be used to initialise the graph.
 func NewGraph() *Graph {
 	return &Graph{
-		Nodes:  map[string]bool{},
-		Edges:  map[string]map[string]bool{},
-		Direct: map[string]string{},
+		nodes:   map[string]bool{},
+		edges:   map[string]map[string]bool{},
+		reverse: map[string]map[string]bool{},
 	}
 }
 
-func (g *Graph) String() string {
-	data, err := json.Marshal(g)
-	if err != nil {
-		panic(err)
+// LinksFrom returns all the links from a node as a slice.
+func (g *Graph) LinksFrom(node string) (edges []string) {
+	for e := range g.edges[node] {
+		edges = append(edges, e)
 	}
-
-	buf := &bytes.Buffer{}
-	json.Indent(buf, data, "", "\t")
-	return buf.String()
+	return
 }
 
+// Add registers a node with the graph.
 func (g *Graph) Add(node string) {
-	g.Nodes[node] = true
+	g.nodes[node] = true
 }
 
+// Link registers an edge with the graph, adding the nodes as needed.
 func (g *Graph) Link(obj, com string) {
-	if g.Edges[obj] == nil {
-		g.Edges[obj] = map[string]bool{}
+	if g.edges[obj] == nil {
+		g.edges[obj] = map[string]bool{}
 	}
 
-	g.Edges[obj][com] = true
-	g.Direct[com] = obj
+	g.edges[obj][com] = true
+
+	if g.reverse[com] == nil {
+		g.reverse[com] = map[string]bool{}
+	}
+	g.reverse[com][obj] = true
 }
 
+// Count returns a count of all the edges in the graph.
 func (g *Graph) Count() int {
 	count := 0
-	for node := range g.Edges {
+	for node := range g.edges {
 		count += g.CountFor(node)
 	}
 	return count
 }
 
+// CountFor returns a count of all of this node's edges.
 func (g *Graph) CountFor(node string) int {
-	if !g.Nodes[node] {
+	if !g.nodes[node] {
 		return 0
 	}
 
-	if g.Edges[node] == nil {
+	if g.edges[node] == nil {
 		return 0
 	}
 
 	count := 0
-	for node := range g.Edges[node] {
+	for node := range g.edges[node] {
 		count++
 		count += g.CountFor(node)
 	}
@@ -70,13 +75,15 @@ func (g *Graph) CountFor(node string) int {
 	return count
 }
 
+// Neighbours returns all the neighbours of this string, including any
+// parent nodes.
 func (g *Graph) Neighbours(node string) []string {
-	neighbours := make([]string, 0, len(g.Edges[node])+1)
-	for k := range g.Edges[node] {
+	neighbours := make([]string, 0, len(g.edges[node])+1)
+	for k := range g.edges[node] {
 		neighbours = append(neighbours, k)
 	}
 
-	if direct := g.Direct[node]; direct != "" {
+	for direct := range g.reverse[node] {
 		neighbours = append(neighbours, direct)
 	}
 
@@ -96,4 +103,47 @@ func (g *Graph) LoadMap(entries []string) {
 	for _, entry := range entries {
 		g.AddOrbit(entry)
 	}
+}
+
+// Search conducts a BFS search over the graph.
+func (g *Graph) Search(from, to string) []string {
+	frontier := NewSet(from)
+	cameFrom := map[string]string{}
+
+	start := from
+
+	for _, neighbour := range g.Neighbours(from) {
+		cameFrom[neighbour] = from
+		frontier.Add(neighbour)
+	}
+
+	frontier.AddList(g.Neighbours(from))
+
+	for !frontier.Empty() {
+		node := frontier.Pop()
+		if node == to {
+			break
+		}
+
+		for _, neighbour := range g.Neighbours(node) {
+			if !frontier.Has(neighbour) {
+				cameFrom[neighbour] = node
+				frontier.Add(neighbour)
+			}
+		}
+		from = node
+	}
+
+	paths := []string{}
+	for to != start {
+		paths = append(paths, to)
+		to = cameFrom[to]
+	}
+	paths = append(paths, to)
+	for i := 0; i < len(paths)/2; i++ {
+		j := len(paths) - i - 1
+		paths[i], paths[j] = paths[j], paths[i]
+	}
+
+	return paths
 }

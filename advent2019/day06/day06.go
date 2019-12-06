@@ -37,29 +37,20 @@ func part1() {
 	fmt.Println(g.Count())
 }
 
-type Search struct {
-	seen     *Set
-	frontier *Set
-}
-
-func find(g *Graph, from, to string, seen, frontier, path *Set) bool {
-	fmt.Println("visiting", from)
-	if from == to {
-		path.Add(to)
-		return false
+func part2() {
+	g := NewGraph()
+	g.LoadMap(universalOrbitMap)
+	if len(universalOrbitMap) != expectedMapSize {
+		panic(fmt.Sprintf("universal map should be %d but is %d!",
+			expectedMapSize, len(universalOrbitMap)))
 	}
 
-	return true
-}
-
-func Find(g *Graph, from, to string) bool {
-	path := NewSet()
-	find(g, from, to, NewSet(), NewSet(), path)
-	fmt.Println(path)
-	return false
+	paths := g.Search(g.LinksFrom("YOU")[0], g.LinksFrom("SAN")[0])
+	fmt.Println(len(paths))
 }
 
 func main() {
 	inst.Run("day06p0", loadMap)
 	inst.Run("day06p1", part1)
+	inst.Run("day06p2", part2)
 }
