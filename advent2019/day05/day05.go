@@ -65,8 +65,14 @@ var diagnosticProgram = []int{
 	1005, 224, 674, 101, 1, 223, 223, 4, 223, 99, 226,
 }
 
+func WithCanned(s string) *ic.Options {
+	return &ic.Options{
+		Console: ic.Canned(s),
+	}
+}
+
 func part1() {
-	_, err := ic.Run(diagnosticProgram, ic.Canned("1"))
+	_, err := ic.Run(diagnosticProgram, WithCanned("1"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -74,7 +80,7 @@ func part1() {
 }
 
 func part2() {
-	_, err := ic.Run(diagnosticProgram, ic.Canned("5"))
+	_, err := ic.Run(diagnosticProgram, WithCanned("5"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

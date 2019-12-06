@@ -5,6 +5,17 @@ import (
 	"io"
 )
 
+// Options is used to keep future changes from break the VM.
+type Options struct {
+	Console io.ReadWriter
+}
+
+func DefaultOptions() *Options {
+	return &Options{
+		Console: Console(),
+	}
+}
+
 const (
 	opAdd    = 1
 	opMul    = 2
@@ -52,9 +63,9 @@ func fetchArgs(mem []int, ip, params, count int) []int {
 // the runs it, returning the program. For Day 2, all of the results
 // are in memory position 0, but I don't want to make that assumption
 // for the future.
-func Run(prog []int, rw io.ReadWriter, mods ...mod) ([]int, error) {
-	if rw == nil {
-		rw = Console() // readwriter.go
+func Run(prog []int, opts *Options, mods ...mod) ([]int, error) {
+	if opts == nil {
+		opts = DefaultOptions()
 	}
 
 	mem := make([]int, len(prog))
@@ -81,14 +92,14 @@ func Run(prog []int, rw io.ReadWriter, mods ...mod) ([]int, error) {
 			ip += 4
 		case opInput:
 			var arg int
-			fmt.Fprintf(rw, "? ")
-			fmt.Fscan(rw, &arg)
+			fmt.Fprintf(opts.Console, "? ")
+			fmt.Fscan(opts.Console, &arg)
 
 			dest := mem[ip+1]
 			mem[dest] = arg
 			ip += 2
 		case opOutput:
-			fmt.Fprintln(rw, args[0])
+			fmt.Fprintln(opts.Console, args[0])
 			ip += 2
 		case opJT:
 			if args[0] != 0 {
