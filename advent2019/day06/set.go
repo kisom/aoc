@@ -47,7 +47,7 @@ func (s *QueueSet) Add(x string) {
 	}
 }
 
-// AddList adds
+// AddList adds each x in xs.
 func (s *QueueSet) AddList(xs []string) {
 	for _, x := range xs {
 		s.Add(x)
